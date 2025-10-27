@@ -1,5 +1,5 @@
 {
-  "name": "@dicteit/ema-sdk",
+  "name": "@MrDru912/ema-sdk",
   "version": "1.0.0",
   "description": "SDK for interacting with EMA (European Medicines Agency) API",
   "main": "dist/index.js",
