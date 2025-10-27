@@ -1,0 +1,73 @@
+{
+  "name": "@dicteit/ema-sdk",
+  "version": "1.0.0",
+  "description": "SDK for interacting with EMA (European Medicines Agency) API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "require": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "prepare": "npm run build",
+    "lint": "eslint 'src/**/*.ts'",
+    "format": "prettier --write 'src/**/*.ts'",
+    "example": "ts-node examples/basic-usage.ts",
+    "example:update": "ts-node examples/update-drug-data.ts",
+    "test:ema": "ts-node test-ema-sdk.ts"
+  },
+  "keywords": [
+    "ema",
+    "api",
+    "sdk",
+    "drugs",
+    "medicine"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@mistralai/mistralai": "^1.10.0",
+    "@opendocsg/pdf2md": "^0.2.2",
+    "adm-zip": "^0.5.16",
+    "axios": "^1.8.3",
+    "cheerio": "^1.0.0",
+    "fuzzball": "^2.1.2",
+    "iconv-lite": "^0.6.3",
+    "pdf-parse": "^2.4.5",
+    "tabula-js": "^1.0.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/fresh-tabula-js": "^2.0.4",
+    "@types/node": "^20.11.24",
+    "@types/pdf-parse": "^1.1.5",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "rimraf": "^5.0.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dicteit/ema-sdk"
+  }
+}
