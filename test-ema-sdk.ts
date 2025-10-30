@@ -310,11 +310,11 @@ async function runTests() {
   log('blue', '╔════════════════════════════════════════════════════════════╗');
   log('blue', '║                    EMA SDK Test Suite                      ║');
   log('blue', '╚════════════════════════════════════════════════════════════╝');
-  
+  console.log(process.env.MISTRAL_API_KEY)
   const ema = new EMA({
     autoUpdateData: true,
     updateCheckIntervalDays: 7,
-    mistralApiKey: "lLFJsbdJURWQ7nWnM4QL62ncP6bgCa3e",
+    mistralApiKey: "o1MuzsZV7ymrZXeZVNRq9vmNpZXEFW3r",
   });
   
   const tests = [

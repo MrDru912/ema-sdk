@@ -308,7 +308,8 @@ Table 1. Within-subject variability of the time action profile of Levemir and NP
 | $\mathrm{AUC}_{\text {GIR, } 0-24 \mathrm{~h}} *$ | 27 | 68 |
 | GIR $_{\text {max }}{ }^{* *}$ | 23 | 46 |
 
-*Area under the curve ${ }^{* *}$ Glucose Infusion Rate p-value $<0.001$ for all comparisons with Levemir
+[^0]
+[^0]:    *Area under the curve ${ }^{* *}$ Glucose Infusion Rate p-value $<0.001$ for all comparisons with Levemir
 
 The prolonged action of Levemir is mediated by the strong self-association of insulin detemir molecules at the injection site and albumin binding via the fatty acid side-chain. Insulin detemir is distributed more slowly to peripheral target tissues compared to NPH insulin. These combined mechanisms of protraction provide a more reproducible absorption and action profile of insulin detemir compared to NPH insulin.
 ![img-0.jpeg](img-0.jpeg)
@@ -368,7 +369,7 @@ Levemir was non-inferior to NPH insulin as measured by $\mathrm{HbA}_{1 \mathrm{
 
 # Paediatric population
 
-The efficacy and safety of Levemir has been studied for up to 12 months, in three randomised controlled clinical trials in adolescents and children ( $\mathrm{n}=1,045$ in total); the trials included in total 167 children aged 1-5 years. The trials demonstrated that glycaemic control $\left(\mathrm{HbA}_{1 \mathrm{c}}\right)$ with Levemir is comparable to NPH insulin and insulin degludec when given as basal-bolus therapy, using a noninferiority margin of $0.4 \%$. In the trial comparing Levemir vs. insulin degludec, the rate of hyperglycaemic episodes with ketosis was significantly higher for Levemir, 1.09 and 0.68 episodes per patient-year of exposure, respectively. Less weight gain (SD score, weight corrected for gender and age) was observed with Levemir than with NPH insulin.
+The efficacy and safety of Levemir has been studied for up to 12 months, in three randomised controlled clinical trials in adolescents and children ( $\mathrm{n}=1,045$ in total); the trials included in total 167 children aged $1-5$ years. The trials demonstrated that glycaemic control $\left(\mathrm{HbA}_{1 \mathrm{c}}\right)$ with Levemir is comparable to NPH insulin and insulin degludec when given as basal-bolus therapy, using a noninferiority margin of $0.4 \%$. In the trial comparing Levemir vs. insulin degludec, the rate of hyperglycaemic episodes with ketosis was significantly higher for Levemir, 1.09 and 0.68 episodes per patient-year of exposure, respectively. Less weight gain (SD score, weight corrected for gender and age) was observed with Levemir than with NPH insulin.
 
 The trial including children above 2 years was extended for an additional 12 months (total of 24 months treatment data) to assess antibody formation after long-term treatment with Levemir. After an increase in insulin antibodies during the first year, the insulin antibodies decreased during the second year to a level slightly higher than pre-trial level. Results indicate that antibody development had no negative effect on glycaemic control and Levemir dose.
 
@@ -2659,7 +2660,7 @@ The insulin scale shows you approximately how much insulin is left in your pen.
 
 To see precisely how much insulin is left use the dose counter:
 Turn the dose selector until the dose counter stops. If it shows 80 , at least 80 units are left in your pen.
-If it shows less than 80, the number shown is the number of units left in your pen.
+If it shows less than 80 , the number shown is the number of units left in your pen.
 Turn the dose selector back until the dose counter shows 0 .
 If you need more insulin than the units left in your pen, you can split your dose between two pens.
 

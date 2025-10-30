@@ -364,7 +364,7 @@ class EMA {
    * Get PDF URL for a medicine (without downloading)
    * @param medicineName Medicine name
    */
-  public getPDFUrl(medicineName: string): string {
+  public getPDFUrlByName(medicineName: string): string {
     return this.pdfExtractor.getPDFUrl(medicineName);
   }
 
