@@ -1,4 +1,3 @@
-import PdfParse from 'pdf-parse';
 import { EMAMedicineMapper } from './models/ema-medicine-mapper';
 import { EMAPDFExtractor } from './models/EMAPDFExtractor';
 import { PDFCache } from './models/PDFCache';

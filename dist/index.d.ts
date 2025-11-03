@@ -100,9 +100,9 @@ declare class EMA {
     preloadCommonMedicines(medicineIds: string[], onProgress?: (current: number, total: number, medicineId: string) => void): Promise<void>;
     /**
      * Get PDF URL for a medicine (without downloading)
-     * @param medicineName Medicine name
+     * @param medicine_url Medicine URL
      */
-    getPDFUrlByName(medicineName: string): string;
+    getPDFUrlByMedicineURL(medicine_url: string): string;
     /**
      * Get cache statistics
      */

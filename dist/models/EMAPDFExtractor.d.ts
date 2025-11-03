@@ -8,11 +8,11 @@ export declare class EMAPDFExtractor {
     /**
      * Normalize product name for URL
      */
-    private normalizeProductName;
+    private getProductNameFromURL;
     /**
-     * Get EMA PDF URL
+     * Get EMA product information PDF URL by medicine url
      */
-    getPDFUrl(productName: string): string;
+    getPDFUrl(medicine_url: string): string;
     /**
      * Download PDF
      */

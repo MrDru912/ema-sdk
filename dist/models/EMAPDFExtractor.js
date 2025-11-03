@@ -20,19 +20,21 @@ class EMAPDFExtractor {
     /**
      * Normalize product name for URL
      */
-    normalizeProductName(name) {
-        return name
+    getProductNameFromURL(url) {
+        const segments = url.split('/');
+        const lastSegment = segments[segments.length - 1];
+        return lastSegment
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '-')
             .replace(/-+/g, '-')
             .replace(/^-|-$/g, '');
     }
     /**
-     * Get EMA PDF URL
+     * Get EMA product information PDF URL by medicine url
      */
-    getPDFUrl(productName) {
-        const normalized = this.normalizeProductName(productName);
-        return `https://www.ema.europa.eu/en/documents/product-information/${normalized}-epar-product-information_en.pdf`;
+    getPDFUrl(medicine_url) {
+        const product_info_normalized_name = this.getProductNameFromURL(medicine_url);
+        return `https://www.ema.europa.eu/en/documents/product-information/${product_info_normalized_name}-epar-product-information_en.pdf`;
     }
     /**
      * Download PDF
