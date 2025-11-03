@@ -34,6 +34,7 @@ class EMAPDFExtractor {
      */
     getPDFUrl(medicine_url) {
         const product_info_normalized_name = this.getProductNameFromURL(medicine_url);
+        console.log("product name from the url: " + product_info_normalized_name);
         return `https://www.ema.europa.eu/en/documents/product-information/${product_info_normalized_name}-epar-product-information_en.pdf`;
     }
     /**

@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import { Mistral } from '@mistralai/mistralai';
+import { log } from 'console';
 
 // Interface for Mistral OCR response
 interface MistralOCRPage {
@@ -51,6 +52,7 @@ export class EMAPDFExtractor {
    */
   getPDFUrl(medicine_url: string): string {
     const product_info_normalized_name = this.getProductNameFromURL(medicine_url);
+    console.log("product name from the url: " + product_info_normalized_name)
     return `https://www.ema.europa.eu/en/documents/product-information/${product_info_normalized_name}-epar-product-information_en.pdf`;
   }
 
