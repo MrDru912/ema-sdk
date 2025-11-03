@@ -1,6 +1,4 @@
-import { end } from 'cheerio/dist/commonjs/api/traversing';
 import { ExtractedPDFData } from '../types';
-import { start } from 'repl';
 
 /**
  * Parse EMA PDF markdown text and extract structured data

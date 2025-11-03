@@ -256,7 +256,7 @@ class EMA {
 
     // 3. Extract extended information from PDF (slow first time)
     try {
-      const pdfUrl = this.pdfExtractor.getPDFUrl(basicInfo.name_of_medicine);
+      const pdfUrl = this.pdfExtractor.getPDFUrl(basicInfo.medicine_url);
       console.log(`📥 Downloading PDF from: ${pdfUrl}`);
       
       // const pdfData = await this.pdfExtractor.downloadPDF(pdfUrl);
@@ -362,10 +362,10 @@ class EMA {
 
   /**
    * Get PDF URL for a medicine (without downloading)
-   * @param medicineName Medicine name
+   * @param medicine_url Medicine URL
    */
-  public getPDFUrlByName(medicineName: string): string {
-    return this.pdfExtractor.getPDFUrl(medicineName);
+  public getPDFUrlByMedicineURL(medicine_url: string): string {
+    return this.pdfExtractor.getPDFUrl(medicine_url);
   }
 
   /**

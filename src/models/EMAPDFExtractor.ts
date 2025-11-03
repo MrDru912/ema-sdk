@@ -35,8 +35,11 @@ export class EMAPDFExtractor {
   /**
    * Normalize product name for URL
    */
-  private normalizeProductName(name: string): string {
-    return name
+  private getProductNameFromURL(url: string): string {
+    const segments = url.split('/');
+    const lastSegment = segments[segments.length - 1];
+
+    return lastSegment
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-')
       .replace(/-+/g, '-')
@@ -44,11 +47,11 @@ export class EMAPDFExtractor {
   }
 
   /**
-   * Get EMA PDF URL
+   * Get EMA product information PDF URL by medicine url
    */
-  getPDFUrl(productName: string): string {
-    const normalized = this.normalizeProductName(productName);
-    return `https://www.ema.europa.eu/en/documents/product-information/${normalized}-epar-product-information_en.pdf`;
+  getPDFUrl(medicine_url: string): string {
+    const product_info_normalized_name = this.getProductNameFromURL(medicine_url);
+    return `https://www.ema.europa.eu/en/documents/product-information/${product_info_normalized_name}-epar-product-information_en.pdf`;
   }
 
   /**
