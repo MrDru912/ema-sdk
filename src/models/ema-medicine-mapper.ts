@@ -248,171 +248,120 @@ export class EMAMedicineMapper {
    * Get paginated medicines with optional search
    * Similar to SÚKL's getPaginatedDrugs()
    */
-  async getPaginatedMedicines(
-    page: number = 1,
-    pageSize: number = 20,
-    query?: string,
-    threshold: number = 70
-  ): Promise<PaginatedResult<EMAMedicineSearchResult>> {
-    await this.ensureDataLoaded();
+async getPaginatedMedicines(
+  page: number = 1,
+  pageSize: number = 20,
+  query?: string,
+  threshold: number = 70
+): Promise<PaginatedResult<EMAMedicineSearchResult>> {
+  await this.ensureDataLoaded();
 
-    page = Math.max(1, page);
-    pageSize = Math.max(1, Math.min(100, pageSize));
+  page = Math.max(1, page);
+  pageSize = Math.max(1, Math.min(100, pageSize));
 
-    let filtered: Array<[string, EMAMedicineDetails, number]> = [];
+  let filtered: Array<[string, EMAMedicineDetails, number]> = [];
 
-    if (query && query.trim()) {
-      const normalizedQuery = normalizeText(query.trim());
-      const queryWords = normalizedQuery.split(/\s+/).filter(word => word.length >= 2);
-      
-      const matchedIds = new Set<string>();
-      const matchScores = new Map<string, number>();
-      
-      // Exact name match
-      if (this.nameToIdsMap.has(normalizedQuery)) {
-        const exactIds = this.nameToIdsMap.get(normalizedQuery) || [];
-        for (const id of exactIds) {
-          matchedIds.add(id);
-          matchScores.set(id, 100);
-        }
-      }
-      
-      // Search by name words
-      if (queryWords.length > 0) {
-        const wordMatches = new Map<string, Set<string>>();
-        
-        for (const word of queryWords) {
-          for (const [indexWord, ids] of this.normalizedNameIndex.entries()) {
-            if (indexWord.includes(word)) {
-              if (!wordMatches.has(word)) {
-                wordMatches.set(word, new Set());
-              }
-              for (const id of ids) {
-                wordMatches.get(word)?.add(id);
-              }
-            }
-          }
-        }
-        
-        // Medicines matching all words
-        if (wordMatches.size === queryWords.length) {
-          const allWordMatches = Array.from(wordMatches.values());
-          if (allWordMatches.length > 0) {
-            const intersection = new Set(allWordMatches[0]);
-            for (let i = 1; i < allWordMatches.length; i++) {
-              for (const id of intersection) {
-                if (!allWordMatches[i].has(id)) {
-                  intersection.delete(id);
-                }
-              }
-            }
-            
-            for (const id of intersection) {
-              matchedIds.add(id);
-              if (!matchScores.has(id) || matchScores.get(id)! < 98) {
-                matchScores.set(id, 98);
-              }
-            }
-          }
-        }
-        
-        // Medicines matching any word
-        for (const ids of wordMatches.values()) {
-          for (const id of ids) {
-            if (!matchScores.has(id)) {
-              matchedIds.add(id);
-              matchScores.set(id, 80);
-            }
-          }
-        }
-      }
-      
-      // Search by substance
-      if (queryWords.length > 0) {
-        for (const word of queryWords) {
-          for (const [indexWord, ids] of this.normalizedSubstanceIndex.entries()) {
-            if (indexWord.includes(word)) {
-              for (const id of ids) {
-                matchedIds.add(id);
-                if (!matchScores.has(id) || matchScores.get(id)! < 75) {
-                  matchScores.set(id, 75);
-                }
-              }
-            }
-          }
-        }
-      }
-      
-      // Fuzzy matching
-      if (matchedIds.size < pageSize * 2) {
-        for (const [id, details] of this.medicineMap.entries()) {
-          if (matchedIds.has(id)) continue;
-          
-          const name = details.name_of_medicine || details.product_name || '';
-          const fuzzyScore = this.calculateMatchScore(normalizedQuery, normalizeText(name));
-
-            if (fuzzyScore >= threshold) {
-            matchedIds.add(id);
-            if (!matchScores.has(id) || matchScores.get(id)! < fuzzyScore) {
-              matchScores.set(id, fuzzyScore);
-            }
-          }
-        }
-      }
-      
-      // Create filtered list
-      for (const id of matchedIds) {
-        const details = this.medicineMap.get(id);
-        if (details) {
-          filtered.push([id, details, matchScores.get(id) || 0]);
-        }
-      }
-      
-      filtered.sort((a, b) => b[2] - a[2]);
-      
-    } else {
-      // No query - return all sorted alphabetically
-      const allMedicines = Array.from(this.medicineMap.entries());
-      allMedicines.sort((a, b) => {
-        const nameA = a[1].name_of_medicine || a[1].product_name || '';
-        const nameB = b[1].name_of_medicine || b[1].product_name || '';
-        return nameA.localeCompare(nameB);
-      });
-      filtered = allMedicines.map(([id, details]) => [id, details, 0]);
-    }
-
-    const totalItems = filtered.length;
-    const totalPages = Math.ceil(totalItems / pageSize);
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = Math.min(startIndex + pageSize, totalItems);
+  if (query && query.trim()) {
+    const normalizedQuery = normalizeText(query.trim());
     
-    if (startIndex >= totalItems) {
+    // Filter out very short or common words
+    if (normalizedQuery.length < 3) {
       return {
         items: [],
         page,
         pageSize,
-        totalItems,
-        totalPages
+        totalItems: 0,
+        totalPages: 0
       };
     }
-
-    const pageItems = filtered.slice(startIndex, endIndex);
     
-    const items: EMAMedicineSearchResult[] = pageItems.map(([id, details, score]) => ({
-      name: details.name_of_medicine || details.product_name || details.product_short_name || details.name || '',
-      id,
-      score,
-      data: details
-    }));
+    const queryWords = normalizedQuery.split(/\s+/).filter(word => word.length >= 3);
+    
+    const matchedIds = new Set<string>();
+    const matchScores = new Map<string, number>();
+    
+    // For each medicine, calculate actual similarity
+    for (const [id, details] of this.medicineMap.entries()) {
+      const name = normalizeText(
+        details.name_of_medicine || 
+        details.product_name || 
+        details.product_short_name || 
+        details.name || ''
+      );
+      
+      if (!name) continue;
+      
+      // Calculate score based on full name match
+      let score = this.calculateMatchScore(normalizedQuery, name);
+      
+      // Boost score if substance matches
+      const substance = normalizeText(details.active_substance || '');
+      if (substance) {
+        const substanceScore = this.calculateMatchScore(normalizedQuery, substance);
+        score = Math.max(score, substanceScore * 0.9); // Slightly lower weight for substance
+      }
+      
+      // Only include if above threshold
+      if (score >= threshold) {
+        matchedIds.add(id);
+        matchScores.set(id, score);
+      }
+    }
+    
+    // Create filtered list
+    for (const id of matchedIds) {
+      const details = this.medicineMap.get(id);
+      if (details) {
+        filtered.push([id, details, matchScores.get(id) || 0]);
+      }
+    }
+    
+    filtered.sort((a, b) => b[2] - a[2]);
+    
+  } else {
+    // No query - return all sorted alphabetically
+    const allMedicines = Array.from(this.medicineMap.entries());
+    allMedicines.sort((a, b) => {
+      const nameA = a[1].name_of_medicine || a[1].product_name || '';
+      const nameB = b[1].name_of_medicine || b[1].product_name || '';
+      return nameA.localeCompare(nameB);
+    });
+    filtered = allMedicines.map(([id, details]) => [id, details, 0]);
+  }
 
+  // ... rest of pagination code stays the same
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  
+  if (startIndex >= totalItems) {
     return {
-      items,
+      items: [],
       page,
       pageSize,
       totalItems,
       totalPages
     };
   }
+
+  const pageItems = filtered.slice(startIndex, endIndex);
+  
+  const items: EMAMedicineSearchResult[] = pageItems.map(([id, details, score]) => ({
+    name: details.name_of_medicine || details.product_name || details.product_short_name || details.name || '',
+    id,
+    score,
+    data: details
+  }));
+
+  return {
+    items,
+    page,
+    pageSize,
+    totalItems,
+    totalPages
+  };
+}
 
 
 private calculateMatchScore(query: string, target: string): number {
@@ -422,7 +371,7 @@ private calculateMatchScore(query: string, target: string): number {
     const dist = levenshtein(query, target);
     
     // Strict rules for short queries
-    if (queryLen === 3 && dist > 1) return 0;
+    if (queryLen <= 3 && dist > 1) return 0;
     if (queryLen === 4 && dist > 2) return 0;
     if (queryLen === 5 && dist > 2) return 0;
     
