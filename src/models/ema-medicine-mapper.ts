@@ -1,8 +1,9 @@
 import { readFileSync, existsSync } from 'fs';
-import { token_sort_ratio } from 'fuzzball';
+import { ratio } from 'fuzzball';
 import { normalizeText } from '../utils';
 import { updateEMAData, checkForUpdates } from './ema-data-updater';
 import { EMAMedicineDetails } from '../types';
+import { distance as levenshtein } from 'fastest-levenshtein';
 
 
 export interface EMAMedicineSearchResult {
@@ -175,15 +176,6 @@ export class EMAMedicineMapper {
                     details[key] = value || '';
                   }
                 });
-
-                if (i === 1) {
-          console.log('\nFirst row field names:', Object.keys(details));
-          console.log('First row values sample:');
-          Object.keys(details).slice(0, 10).forEach(key => {
-            console.log(`  ${key}: "${details[key]}"`);
-          });
-        }
-
         
         // Get product name
         const productName = details.name_of_medicine || details.product_name || details.product_short_name || details.name || '';
@@ -357,8 +349,9 @@ export class EMAMedicineMapper {
           if (matchedIds.has(id)) continue;
           
           const name = details.name_of_medicine || details.product_name || '';
-          const fuzzyScore = token_sort_ratio(normalizedQuery, normalizeText(name));
-          if (fuzzyScore >= threshold) {
+          const fuzzyScore = this.calculateMatchScore(normalizedQuery, normalizeText(name));
+
+            if (fuzzyScore >= threshold) {
             matchedIds.add(id);
             if (!matchScores.has(id) || matchScores.get(id)! < fuzzyScore) {
               matchScores.set(id, fuzzyScore);
@@ -420,6 +413,25 @@ export class EMAMedicineMapper {
       totalPages
     };
   }
+
+
+private calculateMatchScore(query: string, target: string): number {
+  const queryLen = query.length;
+  
+  if (queryLen <= 5) {
+    const dist = levenshtein(query, target);
+    
+    // Strict rules for short queries
+    if (queryLen === 3 && dist > 1) return 0;
+    if (queryLen === 4 && dist > 2) return 0;
+    if (queryLen === 5 && dist > 2) return 0;
+    
+    const maxLen = Math.max(query.length, target.length);
+    return (1 - dist / maxLen) * 100;
+  }
+  
+  return ratio(query, target);
+}
 
   /**
    * Get medicine details by ID
