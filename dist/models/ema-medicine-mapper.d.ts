@@ -51,7 +51,7 @@ export declare class EMAMedicineMapper {
      * Score computation is more strict comparing to medicine search.
      * Levenstein distance is computed to avoid marking regular words as drugs.
      */
-    getClosestMedicineMatch(query?: string, threshold?: number): Promise<ClosestMedicineMatch | null>;
+    getClosestMedicineMatch(query: string, threshold?: number): Promise<ClosestMedicineMatch | null>;
     private calculateMatchScore;
     /**
      * Get medicine details by ID

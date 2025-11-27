@@ -151,6 +151,16 @@ class EMA {
         return this.getFromCacheOrFetch(cacheKey, () => this.medicineMapper.getPaginatedMedicines(page, pageSize, query, threshold));
     }
     /**
+     * Returns basic information about
+     * closes match for the medicine name from the query.
+     * @param query medicine name
+     * @param threshold Minimum similarity score for fuzzy matching (0-100)
+     */
+    async getClosestMedicineMatch(query, threshold = 0) {
+        await this.ensureInitialized();
+        return this.getClosestMedicineMatch(query, threshold);
+    }
+    /**
      * Get detailed information for a specific medicine
      *
      * Returns:

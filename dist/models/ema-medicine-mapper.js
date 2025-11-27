@@ -355,8 +355,6 @@ class EMAMedicineMapper {
      * Levenstein distance is computed to avoid marking regular words as drugs.
      */
     async getClosestMedicineMatch(query, threshold = 0) {
-        if (!query)
-            return null;
         const results = await this.getPaginatedMedicines(1, 1, query, 0);
         if (results.items.length === 0) {
             return null;

@@ -1,4 +1,4 @@
-import { EMAMedicineDetails, EMAMedicineSearchResult, PaginatedResult } from './types';
+import { ClosestMedicineMatch, EMAMedicineDetails, EMAMedicineSearchResult, PaginatedResult } from './types';
 /**
  * Main EMA SDK class that provides a unified interface to all functionality
  * Similar to SUKL class but for EMA Article 57 data
@@ -64,6 +64,13 @@ declare class EMA {
      * @param threshold Minimum similarity score for fuzzy matching (0-100)
      */
     listMedicines(page?: number, pageSize?: number, query?: string, threshold?: number): Promise<PaginatedResult<EMAMedicineSearchResult>>;
+    /**
+     * Returns basic information about
+     * closes match for the medicine name from the query.
+     * @param query medicine name
+     * @param threshold Minimum similarity score for fuzzy matching (0-100)
+     */
+    getClosestMedicineMatch(query: string, threshold?: number): Promise<ClosestMedicineMatch | null>;
     /**
      * Get detailed information for a specific medicine
      *

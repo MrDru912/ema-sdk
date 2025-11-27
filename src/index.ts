@@ -1,7 +1,7 @@
 import { EMAMedicineMapper } from './models/ema-medicine-mapper';
 import { EMAPDFExtractor } from './models/EMAPDFExtractor';
 import { PDFCache } from './models/PDFCache';
-import { EMAMedicineDetails, EMAMedicineSearchResult, PaginatedResult } from './types';
+import { ClosestMedicineMatch, EMAMedicineDetails, EMAMedicineSearchResult, PaginatedResult } from './types';
 import { normalizeText } from './utils';
 import { EMAPDFParser } from './models/EMAPDFParser';
 import { writeFile } from "fs/promises";
@@ -201,6 +201,20 @@ class EMA {
     return this.getFromCacheOrFetch(cacheKey, () => 
       this.medicineMapper.getPaginatedMedicines(page, pageSize, query, threshold)
     );
+  }
+
+  /**
+   * Returns basic information about
+   * closes match for the medicine name from the query.
+   * @param query medicine name
+   * @param threshold Minimum similarity score for fuzzy matching (0-100)
+   */
+  public async getClosestMedicineMatch(
+      query: string,
+      threshold: number = 0
+    ): Promise<ClosestMedicineMatch | null> {
+    await this.ensureInitialized();
+    return this.getClosestMedicineMatch(query, threshold);
   }
 
   /**
