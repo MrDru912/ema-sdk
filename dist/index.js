@@ -2,11 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EMA = void 0;
 const ema_medicine_mapper_1 = require("./models/ema-medicine-mapper");
-const EMAPDFExtractor_1 = require("./models/EMAPDFExtractor");
-const PDFCache_1 = require("./models/PDFCache");
 const utils_1 = require("./utils");
-const EMAPDFParser_1 = require("./models/EMAPDFParser");
-const promises_1 = require("fs/promises");
 /**
  * Main EMA SDK class that provides a unified interface to all functionality
  * Similar to SUKL class but for EMA Article 57 data
@@ -17,20 +13,29 @@ class EMA {
      * @param options Configuration options
      */
     constructor(options = {}) {
+        // public pdfExtractor: EMAPDFExtractor;
+        // private pdfParser: EMAPDFParser;
+        // private pdfCache: PDFCache;
         this.initialized = false;
         this.initializationPromise = null;
+        // private mistralApiKey: string | undefined;
         // Cache for basic responses (not PDF data)
         this.cache = new Map();
         this.defaultCacheTTL = 24 * 60 * 60 * 1000; // 24 hours
-        this.pdfParser = new EMAPDFParser_1.EMAPDFParser();
         this.medicineMapper = new ema_medicine_mapper_1.EMAMedicineMapper(options._dataPath || 'assets/ema-report.csv', options.autoUpdateData !== false);
+        /*
+        this.pdfParser = new EMAPDFParser();
         this.mistralApiKey = options.mistralApiKey;
         // Initialize PDF extractor and cache
         if (!this.mistralApiKey) {
-            console.warn('MISTRAL_API_KEY not found in environment variables. OCR functionality will not work.');
+          console.warn('MISTRAL_API_KEY not found in environment variables. OCR functionality will not work.');
         }
-        this.pdfExtractor = new EMAPDFExtractor_1.EMAPDFExtractor(this.mistralApiKey);
-        this.pdfCache = new PDFCache_1.PDFCache(options.maxPDFCache || 1000, options.pdfCachePath || 'cache/ema-pdf-cache.json');
+        this.pdfExtractor = new EMAPDFExtractor(this.mistralApiKey);
+        this.pdfCache = new PDFCache(
+          options.maxPDFCache || 1000,
+          options.pdfCachePath || 'cache/ema-pdf-cache.json'
+        );
+        */
         // Set update check interval if provided
         if (options.updateCheckIntervalDays) {
             this.medicineMapper.setUpdateCheckInterval(options.updateCheckIntervalDays);
@@ -117,13 +122,13 @@ class EMA {
      */
     clearCache() {
         this.cache.clear();
-        this.pdfCache.clear();
+        // this.pdfCache.clear();
     }
     /**
      * Clear only the PDF cache
      */
     clearPDFCache() {
-        this.pdfCache.clear();
+        // this.pdfCache.clear();
     }
     /**
      * Get a paginated list of medicines with optional search functionality
@@ -163,81 +168,17 @@ class EMA {
         await this.ensureInitialized();
         console.log(`\n📋 Getting details for medicine ID: ${medicineId}`);
         // 1. Get basic info from CSV (always fast)
-        // This includes: name, active_substance, route, country, holder, atc_code, etc.
         const basicInfo = await this.medicineMapper.getMedicineDetails(medicineId);
         if (!basicInfo) {
             console.log(`❌ Medicine not found: ${medicineId}`);
             return null;
         }
         console.log(`✅ Basic info from CSV loaded`);
-        // 2. Check PDF cache for extended information
-        if (!forceRefresh) {
-            const cachedPDF = this.pdfCache.get(medicineId);
-            if (cachedPDF) {
-                console.log(`✅ PDF cache HIT - returning cached extended data`);
-                // Merge basic CSV info with cached PDF extended data
-                return {
-                    ...basicInfo, // All CSV fields (basic info)
-                    ...cachedPDF.extractedData, // Extended info from PDF
-                    _cached: true,
-                    _pdfUrl: cachedPDF.pdfUrl,
-                    _lastExtracted: cachedPDF.fetchedAt
-                };
-            }
-            console.log(`❌ PDF cache MISS - will extract extended info from PDF`);
-        }
-        else {
-            console.log(`🔄 Force refresh - will extract extended info from PDF`);
-        }
-        // 3. Extract extended information from PDF (slow first time)
-        try {
-            const pdfUrl = this.pdfExtractor.getPDFUrl(basicInfo.medicine_url);
-            console.log(`📥 Downloading PDF from: ${pdfUrl}`);
-            // const pdfData = await this.pdfExtractor.downloadPDF(pdfUrl);
-            // console.log(`📄 Extracting text from PDF...`);
-            const mdDocument = await this.pdfExtractor.getMdOfEMADocByURL(pdfUrl);
-            try {
-                if (mdDocument) {
-                    await (0, promises_1.writeFile)("test.md", mdDocument, "utf8");
-                    console.log("✅ File written successfully!");
-                }
-                else
-                    console.log("mdDocument is null");
-            }
-            catch (err) {
-                console.error("❌ Error writing file:", err);
-            }
-            const extractedSections = this.pdfParser.parseFullDocument(mdDocument || "");
-            // 4. Cache the extracted PDF extended data
-            console.log(`💾 Caching extracted extended data...`);
-            this.pdfCache.set(medicineId, {
-                medicineId,
-                medicineName: basicInfo.name_of_medicine,
-                extractedData: extractedSections, // Only extended sections, NOT basic info
-                fetchedAt: new Date().toISOString(),
-                pdfUrl
-            });
-            // 5. Merge and return: CSV basic info + PDF extended info
-            const completeDetails = {
-                ...basicInfo, // All CSV fields (name, active_substance, route, country, etc.)
-                ...extractedSections, // Extended info from PDF (indications, contraindications, etc.)
-                _cached: false,
-                _pdfUrl: pdfUrl,
-                _lastExtracted: new Date().toISOString()
-            };
-            console.log(`✅ Complete! Extended data extracted and cached.`);
-            return completeDetails;
-        }
-        catch (error) {
-            console.error(`❌ Error extracting PDF for ${medicineId}:`, error);
-            console.log(`⚠️ Returning basic CSV data only (PDF extraction failed)`);
-            // Fallback: return basic CSV info only (no extended info)
-            return {
-                ...basicInfo,
-                _cached: false,
-                _extractionFailed: true
-            };
-        }
+        return {
+            ...basicInfo,
+            _cached: false,
+            _extractionFailed: true
+        };
     }
     /**
      * Get medicines by country
@@ -275,18 +216,18 @@ class EMA {
         }
         console.log(`✅ Preloading complete!\n`);
     }
-    /**
-     * Get PDF URL for a medicine (without downloading)
-     * @param medicine_url Medicine URL
-     */
-    getPDFUrlByMedicineURL(medicine_url) {
-        return this.pdfExtractor.getPDFUrl(medicine_url);
-    }
+    // /**
+    //  * Get PDF URL for a medicine (without downloading)
+    //  * @param medicine_url Medicine URL
+    //  */
+    // public getPDFUrlByMedicineURL(medicine_url: string): string {
+    //   return this.pdfExtractor.getPDFUrl(medicine_url);
+    // }
     /**
      * Get cache statistics
      */
     getCacheStats() {
-        const pdfCacheStats = this.pdfCache.getStats();
+        // const pdfCacheStats = this.pdfCache.getStats();
         const basicCacheSize = JSON.stringify(Object.fromEntries(this.cache)).length;
         return {
             basicCache: {
@@ -294,14 +235,14 @@ class EMA {
                 sizeInMB: (basicCacheSize / 1024 / 1024).toFixed(2),
                 description: 'Search results and lists from CSV'
             },
-            pdfCache: {
-                ...pdfCacheStats,
-                description: 'Extended information extracted from PDFs'
-            },
-            total: {
-                entries: this.cache.size + pdfCacheStats.totalEntries,
-                sizeInMB: (basicCacheSize / 1024 / 1024 + parseFloat(pdfCacheStats.sizeInMB)).toFixed(2)
-            }
+            // pdfCache: {
+            //   ...pdfCacheStats,
+            //   description: 'Extended information extracted from PDFs'
+            // },
+            // total: {
+            //   entries: this.cache.size + pdfCacheStats.totalEntries,
+            //   sizeInMB: (basicCacheSize / 1024 / 1024 + parseFloat(pdfCacheStats.sizeInMB)).toFixed(2)
+            // }
         };
     }
     /**

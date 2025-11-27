@@ -76,6 +76,10 @@ export interface EMAMedicineDetails {
     _lastExtracted: string;
     [key: string]: any;
 }
+export interface ClosestMedicineMatch {
+    name: string;
+    code: string;
+}
 /**
  * Extracted data structure from PDF
  * This is what gets stored in PDFCache.extractedData

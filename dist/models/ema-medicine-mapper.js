@@ -5,6 +5,7 @@ const fs_1 = require("fs");
 const fuzzball_1 = require("fuzzball");
 const utils_1 = require("../utils");
 const ema_data_updater_1 = require("./ema-data-updater");
+const fastest_levenshtein_1 = require("fastest-levenshtein");
 class EMAMedicineMapper {
     constructor(csvPath = 'assets/medicines_output_medicines_en.csv', autoUpdate = true) {
         this.csvPath = csvPath;
@@ -144,13 +145,6 @@ class EMAMedicineMapper {
                         details[key] = value || '';
                     }
                 });
-                if (i === 1) {
-                    console.log('\nFirst row field names:', Object.keys(details));
-                    console.log('First row values sample:');
-                    Object.keys(details).slice(0, 10).forEach(key => {
-                        console.log(`  ${key}: "${details[key]}"`);
-                    });
-                }
                 // Get product name
                 const productName = details.name_of_medicine || details.product_name || details.product_short_name || details.name || '';
                 if (!productName)
@@ -353,6 +347,46 @@ class EMAMedicineMapper {
             totalItems,
             totalPages
         };
+    }
+    /**
+     * Get closest medicine match from EMA database.
+     * Used for drug identification in chat.
+     * Score computation is more strict comparing to medicine search.
+     * Levenstein distance is computed to avoid marking regular words as drugs.
+     */
+    async getClosestMedicineMatch(query, threshold = 0) {
+        if (!query)
+            return null;
+        const results = await this.getPaginatedMedicines(1, 1, query, 0);
+        if (results.items.length === 0) {
+            return null;
+        }
+        else {
+            const closetsMatchMedicine = results.items[0];
+            const score = this.calculateMatchScore(query, closetsMatchMedicine.name);
+            if (score > threshold)
+                return null;
+            return {
+                name: closetsMatchMedicine.name,
+                code: closetsMatchMedicine.data.ema_product_number,
+            };
+        }
+    }
+    calculateMatchScore(query, target) {
+        const queryLen = query.length;
+        if (queryLen <= 5) {
+            const dist = (0, fastest_levenshtein_1.distance)(query, target);
+            // Strict rules for short queries
+            if (queryLen <= 3 && dist > 1)
+                return 0;
+            if (queryLen === 4 && dist > 2)
+                return 0;
+            if (queryLen === 5 && dist > 2)
+                return 0;
+            const maxLen = Math.max(query.length, target.length);
+            return (1 - dist / maxLen) * 100;
+        }
+        return (0, fuzzball_1.token_sort_ratio)(query, target);
     }
     /**
      * Get medicine details by ID

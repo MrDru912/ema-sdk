@@ -1,4 +1,3 @@
-import { EMAPDFExtractor } from './models/EMAPDFExtractor';
 import { EMAMedicineDetails, EMAMedicineSearchResult, PaginatedResult } from './types';
 /**
  * Main EMA SDK class that provides a unified interface to all functionality
@@ -6,12 +5,8 @@ import { EMAMedicineDetails, EMAMedicineSearchResult, PaginatedResult } from './
  */
 declare class EMA {
     private medicineMapper;
-    pdfExtractor: EMAPDFExtractor;
-    private pdfParser;
-    private pdfCache;
     private initialized;
     private initializationPromise;
-    private mistralApiKey;
     private cache;
     private defaultCacheTTL;
     /**
@@ -99,11 +94,6 @@ declare class EMA {
      */
     preloadCommonMedicines(medicineIds: string[], onProgress?: (current: number, total: number, medicineId: string) => void): Promise<void>;
     /**
-     * Get PDF URL for a medicine (without downloading)
-     * @param medicine_url Medicine URL
-     */
-    getPDFUrlByMedicineURL(medicine_url: string): string;
-    /**
      * Get cache statistics
      */
     getCacheStats(): {
@@ -111,22 +101,6 @@ declare class EMA {
             entries: number;
             sizeInMB: string;
             description: string;
-        };
-        pdfCache: {
-            description: string;
-            totalEntries: number;
-            maxEntries: number;
-            sizeInMB: string;
-            utilizationPercent: string;
-            topUsedMedicines: {
-                id: string;
-                name: string;
-                accessCount: number;
-            }[];
-        };
-        total: {
-            entries: number;
-            sizeInMB: string;
         };
     };
     /**
