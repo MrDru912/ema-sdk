@@ -157,6 +157,7 @@ class EMA {
      * @param threshold Minimum similarity score for fuzzy matching (0-100)
      */
     async getQuickMedicineMatch(query, threshold = 0) {
+        // already sorted by score
         const results = await this.listMedicines(1, 1, query, 60);
         if (results.items.length === 0) {
             return null;
@@ -164,7 +165,8 @@ class EMA {
         else {
             const closetsMatchMedicine = results.items[0];
             const score = this.medicineMapper.calculateMatchScore(query, closetsMatchMedicine.name);
-            if (score > threshold)
+            console.log("chat score: " + score);
+            if (score < threshold)
                 return null;
             return {
                 name: closetsMatchMedicine.name,

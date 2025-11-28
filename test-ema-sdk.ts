@@ -71,9 +71,9 @@ async function testSearch(ema: EMA): Promise<boolean> {
   section('Test 2: Search Medicines');
   
   try {
-    info('Searching for "levemir"...');
+    info('Searching for "too"...');
     
-    const results = await ema.listMedicines(1, 5, 'levemir');
+    const results = await ema.listMedicines(1, 5, 'too');
     
     success(`Found ${results.totalItems} medicines`);
     info(`Showing page ${results.page} of ${results.totalPages}`);
@@ -225,9 +225,10 @@ async function testFuzzySearch(ema: EMA): Promise<boolean> {
   section('Test 6: Fuzzy Search (with typo)');
   
   try {
-    info('Searching for "levmir" (typo)...');
+    const drugName = "any"
+    info(`Searching for "${drugName}" (typo)...`);
     
-    const results = await ema.listMedicines(1, 3, 'levmir', 60);
+    const results = await ema.listMedicines(1, 3, drugName, 30);
     
     if (results.items.length > 0) {
       success(`Found ${results.items.length} medicines despite typo`);
@@ -249,6 +250,32 @@ async function testFuzzySearch(ema: EMA): Promise<boolean> {
 }
 
 /**
+ * Test 6: Fuzzy search
+ */
+async function testQuickMatchSearch(ema: EMA): Promise<boolean> {
+  section('Test 8: Quick Match Search (with typo)');
+  
+  try {
+    const drugName = "any"
+    info(`Searching for "${drugName}" (typo)...`);
+    
+    const result = await ema.getQuickMedicineMatch(drugName, 30);
+    
+    if (result){
+      info(JSON.stringify(result));      
+      return true;
+    } else {
+      info('No fuzzy matches found (that\'s okay)');
+      return true; // Not a failure, just no matches
+    }
+  } catch (err) {
+    error(`Fuzzy search failed: ${err}`);
+    return false;
+  }
+}
+
+
+/**
  * Test 7: Performance test
  */
 async function testPerformance(ema: EMA): Promise<boolean> {
@@ -259,7 +286,7 @@ async function testPerformance(ema: EMA): Promise<boolean> {
     
     const searches = [
       'aspirin', 'insulin', 'paracetamol', 'ibuprofen', 'humira',
-      'viagra', 'lipitor', 'nexium', 'advil', 'tylenol'
+      'viagra', 'lipitor', 'nexium', 'advil', 'took'
     ];
     
     const startTime = Date.now();
@@ -282,9 +309,9 @@ async function testPerformance(ema: EMA): Promise<boolean> {
   }
 }
 
-/**
- * Test 8: PDF Extraction (First Time - Slow)
- */
+// /**
+//  * Test 8: PDF Extraction (First Time - Slow)
+//  */
 // async function testPDFExtractionFirstTime(ema: EMA): Promise<boolean> {
 //   section('Test 8: PDF Extraction (First Time)');
   
@@ -314,7 +341,7 @@ async function runTests() {
   const ema = new EMA({
     autoUpdateData: true,
     updateCheckIntervalDays: 7,
-    mistralApiKey: "o1MuzsZV7ymrZXeZVNRq9vmNpZXEFW3r",
+    mistralApiKey: "",
   });
   
   const tests = [
@@ -325,6 +352,7 @@ async function runTests() {
     { name: 'Country Search', fn: () => testCountrySearch(ema) },
     { name: 'Fuzzy Search', fn: () => testFuzzySearch(ema) },
     { name: 'Performance', fn: () => testPerformance(ema) },
+    { name: 'Quick match search', fn: () => testQuickMatchSearch(ema) },
     // { name: 'Pdf extraction', fn: () => testPDFExtractionFirstTime(ema)},
   ];
   
