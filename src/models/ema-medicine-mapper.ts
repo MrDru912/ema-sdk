@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'fs';
 import { token_sort_ratio } from 'fuzzball';
 import { normalizeText } from '../utils';
 import { updateEMAData, checkForUpdates } from './ema-data-updater';
-import { ClosestMedicineMatch, EMAMedicineDetails } from '../types';
+import { EMAMedicineDetails } from '../types';
 import { distance as levenshtein } from 'fastest-levenshtein';
 
 
@@ -414,31 +414,8 @@ export class EMAMedicineMapper {
     };
   }
 
-  /**
-   * Get closest medicine match from EMA database.
-   * Used for drug identification in chat.
-   * Score computation is more strict comparing to medicine search.
-   * Levenstein distance is computed to avoid marking regular words as drugs.
-   */
-  async getClosestMedicineMatch(
-    query: string,
-    threshold: number = 0
-  ): Promise<ClosestMedicineMatch | null> {
-    const results = await this.getPaginatedMedicines(1, 1, query, 60);
-    if (results.items.length === 0) {
-      return null;
-    } else {
-      const closetsMatchMedicine = results.items[0];
-      const score = this.calculateMatchScore(query, closetsMatchMedicine.name);
-      if (score > threshold) return null;
-      return {
-        name: closetsMatchMedicine.name,
-        code: closetsMatchMedicine.data.ema_product_number,
-      }
-    }
-  }
 
-  private calculateMatchScore(query: string, target: string): number {
+  public calculateMatchScore(query: string, target: string): number {
     const queryLen = query.length;
     
     if (queryLen <= 5) {

@@ -213,8 +213,18 @@ class EMA {
       query: string,
       threshold: number = 0
     ): Promise<ClosestMedicineMatch | null> {
-    await this.ensureInitialized();
-    return this.getQuickMedicineMatch(query, threshold);
+    const results = await this.listMedicines(1, 1, query, 60);
+    if (results.items.length === 0) {
+      return null;
+    } else {
+      const closetsMatchMedicine = results.items[0];
+      const score = this.medicineMapper.calculateMatchScore(query, closetsMatchMedicine.name);
+      if (score > threshold) return null;
+      return {
+        name: closetsMatchMedicine.name,
+        code: closetsMatchMedicine.data.ema_product_number,
+      }
+    }
   }
 
   /**

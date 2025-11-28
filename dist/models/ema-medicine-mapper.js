@@ -348,28 +348,6 @@ class EMAMedicineMapper {
             totalPages
         };
     }
-    /**
-     * Get closest medicine match from EMA database.
-     * Used for drug identification in chat.
-     * Score computation is more strict comparing to medicine search.
-     * Levenstein distance is computed to avoid marking regular words as drugs.
-     */
-    async getClosestMedicineMatch(query, threshold = 0) {
-        const results = await this.getPaginatedMedicines(1, 1, query, 60);
-        if (results.items.length === 0) {
-            return null;
-        }
-        else {
-            const closetsMatchMedicine = results.items[0];
-            const score = this.calculateMatchScore(query, closetsMatchMedicine.name);
-            if (score > threshold)
-                return null;
-            return {
-                name: closetsMatchMedicine.name,
-                code: closetsMatchMedicine.data.ema_product_number,
-            };
-        }
-    }
     calculateMatchScore(query, target) {
         const queryLen = query.length;
         if (queryLen <= 5) {
