@@ -350,10 +350,14 @@ class EMAMedicineMapper {
     }
     /**
      * Lightweight drug detection for chat - no fuzzy matching
+     * Query is already a single word/token
      */
     async getQuickMedicineMatch(query, threshold = 70) {
         await this.ensureDataLoaded();
         const normalizedQuery = (0, utils_1.normalizeText)(query.trim());
+        // Skip very short queries
+        if (normalizedQuery.length < 3)
+            return null;
         // 1. Exact name match
         if (this.nameToIdsMap.has(normalizedQuery)) {
             const ids = this.nameToIdsMap.get(normalizedQuery) || [];
@@ -367,21 +371,35 @@ class EMAMedicineMapper {
                 }
             }
         }
-        // 2. Partial name match only (no fuzzy)
-        const queryWords = normalizedQuery.split(/\s+/);
-        for (const [indexWord, ids] of this.normalizedNameIndex.entries()) {
-            if (queryWords.some(word => indexWord.includes(word))) {
-                const firstId = Array.from(ids)[0];
-                const details = this.medicineMap.get(firstId);
-                if (details) {
-                    const name = details.name_of_medicine || details.product_name || '';
-                    const score = this.calculateMatchScore(query, name);
-                    if (score <= threshold) {
-                        return {
-                            name,
-                            code: details.ema_product_number,
-                        };
-                    }
+        // 2. Check if query word exists in name index
+        if (this.normalizedNameIndex.has(normalizedQuery)) {
+            const ids = this.normalizedNameIndex.get(normalizedQuery);
+            const firstId = Array.from(ids)[0];
+            const details = this.medicineMap.get(firstId);
+            if (details) {
+                const name = details.name_of_medicine || details.product_name || '';
+                const score = this.calculateMatchScore(query, name);
+                if (score <= threshold) {
+                    return {
+                        name,
+                        code: details.ema_product_number,
+                    };
+                }
+            }
+        }
+        // 3. Check substance index
+        if (this.normalizedSubstanceIndex.has(normalizedQuery)) {
+            const ids = this.normalizedSubstanceIndex.get(normalizedQuery);
+            const firstId = Array.from(ids)[0];
+            const details = this.medicineMap.get(firstId);
+            if (details) {
+                const name = details.name_of_medicine || details.product_name || '';
+                const score = this.calculateMatchScore(query, name);
+                if (score <= threshold) {
+                    return {
+                        name,
+                        code: details.ema_product_number,
+                    };
                 }
             }
         }

@@ -47,6 +47,7 @@ export declare class EMAMedicineMapper {
     getPaginatedMedicines(page?: number, pageSize?: number, query?: string, threshold?: number): Promise<PaginatedResult<EMAMedicineSearchResult>>;
     /**
      * Lightweight drug detection for chat - no fuzzy matching
+     * Query is already a single word/token
      */
     getQuickMedicineMatch(query: string, threshold?: number): Promise<ClosestMedicineMatch | null>;
     private calculateMatchScore;
