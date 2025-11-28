@@ -70,7 +70,7 @@ declare class EMA {
      * @param query medicine name
      * @param threshold Minimum similarity score for fuzzy matching (0-100)
      */
-    getClosestMedicineMatch(query: string, threshold?: number): Promise<ClosestMedicineMatch | null>;
+    getQuickMedicineMatch(query: string, threshold?: number): Promise<ClosestMedicineMatch | null>;
     /**
      * Get detailed information for a specific medicine
      *

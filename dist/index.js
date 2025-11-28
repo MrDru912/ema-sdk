@@ -156,9 +156,9 @@ class EMA {
      * @param query medicine name
      * @param threshold Minimum similarity score for fuzzy matching (0-100)
      */
-    async getClosestMedicineMatch(query, threshold = 0) {
+    async getQuickMedicineMatch(query, threshold = 0) {
         await this.ensureInitialized();
-        return this.getClosestMedicineMatch(query, threshold);
+        return this.getQuickMedicineMatch(query, threshold);
     }
     /**
      * Get detailed information for a specific medicine

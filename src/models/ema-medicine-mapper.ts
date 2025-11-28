@@ -414,29 +414,52 @@ export class EMAMedicineMapper {
     };
   }
 
-  /**
-   * Get closest medicine match from EMA database.
-   * Used for drug identification in chat.
-   * Score computation is more strict comparing to medicine search.
-   * Levenstein distance is computed to avoid marking regular words as drugs.
-   */
-  async getClosestMedicineMatch(
-    query: string,
-    threshold: number = 0
-  ): Promise<ClosestMedicineMatch | null> {
-    const results = await this.getPaginatedMedicines(1, 1, query, 0);
-    if (results.items.length === 0) {
-      return null;
-    } else {
-      const closetsMatchMedicine = results.items[0];
-      const score = this.calculateMatchScore(query, closetsMatchMedicine.name);
-      if (score > threshold) return null;
-      return {
-        name: closetsMatchMedicine.name,
-        code: closetsMatchMedicine.data.ema_product_number,
+/**
+ * Lightweight drug detection for chat - no fuzzy matching
+ */
+async getQuickMedicineMatch(
+  query: string,
+  threshold: number = 70
+): Promise<ClosestMedicineMatch | null> {
+  await this.ensureDataLoaded();
+  
+  const normalizedQuery = normalizeText(query.trim());
+  
+  // 1. Exact name match
+  if (this.nameToIdsMap.has(normalizedQuery)) {
+    const ids = this.nameToIdsMap.get(normalizedQuery) || [];
+    if (ids.length > 0) {
+      const details = this.medicineMap.get(ids[0]);
+      if (details) {
+        return {
+          name: details.name_of_medicine || details.product_name || '',
+          code: details.ema_product_number,
+        };
       }
     }
   }
+  
+  // 2. Partial name match only (no fuzzy)
+  const queryWords = normalizedQuery.split(/\s+/);
+  for (const [indexWord, ids] of this.normalizedNameIndex.entries()) {
+    if (queryWords.some(word => indexWord.includes(word))) {
+      const firstId = Array.from(ids)[0];
+      const details = this.medicineMap.get(firstId);
+      if (details) {
+        const name = details.name_of_medicine || details.product_name || '';
+        const score = this.calculateMatchScore(query, name);
+        if (score <= threshold) {
+          return {
+            name,
+            code: details.ema_product_number,
+          };
+        }
+      }
+    }
+  }
+  
+  return null;
+}
 
   private calculateMatchScore(query: string, target: string): number {
     const queryLen = query.length;
