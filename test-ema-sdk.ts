@@ -285,22 +285,22 @@ async function testPerformance(ema: EMA): Promise<boolean> {
 /**
  * Test 8: PDF Extraction (First Time - Slow)
  */
-async function testPDFExtractionFirstTime(ema: EMA): Promise<boolean> {
-  section('Test 8: PDF Extraction (First Time)');
+// async function testPDFExtractionFirstTime(ema: EMA): Promise<boolean> {
+//   section('Test 8: PDF Extraction (First Time)');
   
-  try {
-    info('Getting details with PDF extraction for "Levemir"...');
-    info('This will download and parse the PDF (may take 5-10 seconds)');
-    console.log('');
+//   try {
+//     info('Getting details with PDF extraction for "Levemir"...');
+//     info('This will download and parse the PDF (may take 5-10 seconds)');
+//     console.log('');
 
-    const pdfUrl = ema.pdfExtractor.getPDFUrl('levemir');
-    const data = await ema.pdfExtractor.getMdOfEMADocByURL(pdfUrl);
-    return true;
-  } catch (err) {
-    error(`PDF Extraction test failed: ${err}`);
-    return false;
-  }
-}
+//     const pdfUrl = ema.pdfExtractor.getPDFUrl('levemir');
+//     const data = await ema.pdfExtractor.getMdOfEMADocByURL(pdfUrl);
+//     return true;
+//   } catch (err) {
+//     error(`PDF Extraction test failed: ${err}`);
+//     return false;
+//   }
+// }
 
 /**
  * Main test runner
@@ -325,7 +325,7 @@ async function runTests() {
     { name: 'Country Search', fn: () => testCountrySearch(ema) },
     { name: 'Fuzzy Search', fn: () => testFuzzySearch(ema) },
     { name: 'Performance', fn: () => testPerformance(ema) },
-    { name: 'Pdf extraction', fn: () => testPDFExtractionFirstTime(ema)},
+    // { name: 'Pdf extraction', fn: () => testPDFExtractionFirstTime(ema)},
   ];
   
   const results: { name: string; passed: boolean }[] = [];

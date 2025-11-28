@@ -46,10 +46,12 @@ export declare class EMAMedicineMapper {
      */
     getPaginatedMedicines(page?: number, pageSize?: number, query?: string, threshold?: number): Promise<PaginatedResult<EMAMedicineSearchResult>>;
     /**
-     * Lightweight drug detection for chat - no fuzzy matching
-     * Query is already a single word/token
+     * Get closest medicine match from EMA database.
+     * Used for drug identification in chat.
+     * Score computation is more strict comparing to medicine search.
+     * Levenstein distance is computed to avoid marking regular words as drugs.
      */
-    getQuickMedicineMatch(query: string, threshold?: number): Promise<ClosestMedicineMatch | null>;
+    getClosestMedicineMatch(query: string, threshold?: number): Promise<ClosestMedicineMatch | null>;
     private calculateMatchScore;
     /**
      * Get medicine details by ID
