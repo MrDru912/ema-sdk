@@ -256,7 +256,7 @@ async function testQuickMatchSearch(ema: EMA): Promise<boolean> {
   section('Test 8: Quick Match Search (with typo)');
   
   try {
-    const drugName = "any"
+    const drugName = "haven't"
     info(`Searching for "${drugName}" (typo)...`);
     
     const result = await ema.getQuickMedicineMatch(drugName, 30);

@@ -18,26 +18,6 @@ class EMAPDFExtractor {
         }
     }
     /**
-     * Normalize product name for URL
-     */
-    getProductNameFromURL(url) {
-        const segments = url.split('/');
-        const lastSegment = segments[segments.length - 1];
-        return lastSegment
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '');
-    }
-    /**
-     * Get EMA product information PDF URL by medicine url
-     */
-    getPDFUrl(medicine_url) {
-        const product_info_normalized_name = this.getProductNameFromURL(medicine_url);
-        console.log("product name from the url: " + product_info_normalized_name);
-        return `https://www.ema.europa.eu/en/documents/product-information/${product_info_normalized_name}-epar-product-information_en.pdf`;
-    }
-    /**
      * Download PDF
      */
     async downloadPDF(url) {
